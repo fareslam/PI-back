@@ -50,23 +50,21 @@ public class UserController {
    	 PasswordEncoder encoder = new BCryptPasswordEncoder();
           user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body("User created successfully");
+        return new ResponseEntity<>(user, HttpStatus.CREATED); 
     }
     
     @PostMapping("/login")
     public ResponseEntity<?> login( @RequestBody User user) {
         User existingUser = userRepository.findByUsername(user.getUsername());
         if (existingUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);          }
    	 PasswordEncoder encoder = new BCryptPasswordEncoder();
         String encodedPassword = encoder.encode(user.getPassword());
         if (!encoder.matches(user.getPassword(), existingUser.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect password");
         }
         
-        return ResponseEntity.ok("Login successful");
-    }
+        return new ResponseEntity<>(existingUser, HttpStatus.OK);    }
 
     
 }
