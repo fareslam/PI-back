@@ -7,11 +7,18 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+ 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
- 
 import esprit.pi.Repository.UserRepository;
 import esprit.pi.entity.User;
 
@@ -30,22 +37,9 @@ public class UserController {
     
     // Signup method
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@Valid @RequestBody User user) {
+    public ResponseEntity<?> signup( @RequestBody User user) {
 
-    	if (userRepository.existsByCin(user.getCin())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("A user with the given CIN already exists");
-        }
-    	if (userRepository.existsByEmail(user.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("A user with the given Email already exists");
-        }
-    	
-    	if (userRepository.existsByTel(user.getTel())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("A user with the given Telephone number already exists");
-        }
-    	
-    	if (userRepository.existsByUsername(user.getUsername())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("A user with the given username number already exists");
-        }
+
     	
    	 PasswordEncoder encoder = new BCryptPasswordEncoder();
           user.setPassword(encoder.encode(user.getPassword()));
@@ -65,6 +59,45 @@ public class UserController {
         }
         
         return new ResponseEntity<>(existingUser, HttpStatus.OK);    }
+    
+	@GetMapping("/get/{username}")
+public User getUser(@PathVariable(value = "username") String username)
+{
+        User user = userRepository.findByUsername(username);
+		return user;
+		}
+	
+    @PutMapping("/update/{username}")
+    public ResponseEntity<?> update(@PathVariable(value = "username") String username, @RequestBody User user) {
 
+        User existingUser = userRepository.findByUsername(username);
+
+     
+    	
+
+    	
+    	if (user.getPassword()==null)
+    	{
+        	existingUser.setPassword(existingUser.getPassword());
+
+    	}
+    	
+    	if (user.getPassword()!=null)
+    	{
+
+   	 PasswordEncoder encoder = new BCryptPasswordEncoder();
+   	existingUser.setPassword(encoder.encode(user.getPassword()));
+    	}
+    	existingUser.setCin(user.getCin());
+
+    	existingUser.setDateBirth(user.getDateBirth());
+    	existingUser.setName(user.getName());
+    	existingUser.setSurname(user.getSurname());
+    	existingUser.setTel(user.getTel());
+    	existingUser.setUsername(user.getUsername());
+    	existingUser.setEmail(user.getEmail());
+        userRepository.save(existingUser);
+        return new ResponseEntity<>(user, HttpStatus.OK); 
+    }
     
 }
