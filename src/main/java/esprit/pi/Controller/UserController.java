@@ -24,7 +24,7 @@ import esprit.pi.entity.User;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 
 public class UserController {
 
@@ -99,5 +99,13 @@ public User getUser(@PathVariable(value = "username") String username)
         userRepository.save(existingUser);
         return new ResponseEntity<>(user, HttpStatus.OK); 
     }
+    
+    
+	@GetMapping("/flam")
+public int getUser()
+{
+		 
+		return 10510;
+		}
     
 }
